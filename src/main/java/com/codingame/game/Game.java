@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-
 import com.codingame.event.Animation;
 import com.codingame.event.EventData;
 import com.codingame.game.grid.Coord;
@@ -38,6 +37,7 @@ public class Game {
     public int turn;
 
     public int[] losses = new int[] { 0, 0 };
+    private boolean isCustomMap = false;
 
     public void init() {
         players = gameManager.getPlayers();
@@ -50,23 +50,53 @@ public class Game {
     }
 
     private void initPlayers() {
-        int birdId = 0;
-        List<List<Coord>> spawnLocations = findSpawnLocations();
+        int birdId = 1360;
 
-        for (Player p : players) {
-            p.init();
-
-            for (List<Coord> spawn : spawnLocations) {
-                Bird bird = new Bird(birdId++, p);
-                p.birds.add(bird);
-                for (Coord c : spawn) {
-                    if (p.getIndex() == 1) {
-                        c = grid.opposite(c);
+        if (isCustomMap) {
+            List<List<Coord>> p1Spawns = grid.detectSpawnIslands().stream().map(s -> s.stream().sorted().toList()).toList();
+            List<List<Coord>> p2Spawns = grid.detectSpawnIslands2().stream().map(s -> s.stream().sorted().toList()).toList();
+            System.out.println("p1Spawns: "+p1Spawns);
+            System.out.println("p2Spawns: "+p2Spawns);
+            
+            for (Player p : players) {
+                p.init();
+                List<List<Coord>> mySpawns = p.getIndex() == 0 ? p1Spawns : p2Spawns;
+                for (List<Coord> spawn : mySpawns) {
+                    Bird bird = new Bird(birdId++, p);
+                    p.birds.add(bird);
+                    Coord prev_coord = null;
+                    for (Coord c : spawn) {
+                        bird.body.add(c);
+                        // write a snake validator for head in the middle and throw exception for bad map design
+                        if(prev_coord != null) {
+                            Direction coords_delta = Direction.fromCoord(new Coord(
+                                prev_coord.getX() - c.getX(), prev_coord.getY()-c.getY()));
+                            if (coords_delta.equals(Direction.UNSET)) {
+                                throw new NullPointerException("discontinuous snake parsed from map.txt: "+coords_delta.coord);
+                            }
+                        }
+                        prev_coord = c;
                     }
-                    bird.body.add(c);
+                    System.out.println("Bird "+bird.id+" head at: "+bird.getHeadPos()+", facing: "+bird.getFacing());
                 }
             }
-
+        } else {
+            List<List<Coord>> spawnLocations = findSpawnLocations();
+    
+            for (Player p : players) {
+                p.init();
+    
+                for (List<Coord> spawn : spawnLocations) {
+                    Bird bird = new Bird(birdId++, p);
+                    p.birds.add(bird);
+                    for (Coord c : spawn) {
+                        if (p.getIndex() == 1) {
+                            c = grid.opposite(c);
+                        }
+                        bird.body.add(c);
+                    }
+                }
+            }
         }
     }
 
@@ -89,9 +119,47 @@ public class Game {
     }
 
     private void initGrid(Random random) {
-        GridMaker gridMaker = new GridMaker(random, gameManager.getLeagueLevel());
-        this.grid = gridMaker.make();
+        String customMapPath = System.getProperty("customMapFile");
+        if (customMapPath != null && !customMapPath.isEmpty()) {
+            loadCustomGrid(customMapPath);
+        } else {
+            GridMaker gridMaker = new GridMaker(random, gameManager.getLeagueLevel());
+            this.grid = gridMaker.make();
+        }
+    }
 
+    private void loadCustomGrid(String path) {
+        try {
+            java.util.List<String> lines = java.nio.file.Files.readAllLines(java.nio.file.Paths.get(path))
+                .stream().filter(l -> !l.startsWith("EXPECTED")).collect(java.util.stream.Collectors.toList());
+            
+            if (lines.isEmpty()) throw new RuntimeException("Custom map file is empty!");
+            
+            int height = lines.size();
+            int width = lines.get(0).length();
+            this.grid = new Grid(width, height);
+            
+            for (int y = 0; y < height; y++) {
+                String row = lines.get(y);
+                for (int x = 0; x < width; x++) {
+                    char c = x < row.length() ? row.charAt(x) : ' ';
+                    Coord coord = new Coord(x, y);
+                    if (c == '#') {
+                        this.grid.get(coord).setType(Tile.TYPE_WALL);
+                    } else if (c == '@') {
+                        this.grid.apples.add(coord);
+                    } else if (c == '0') {
+                        this.grid.spawns.add(coord);
+                    } else if (c == '1') {
+                        this.grid.spawns2.add(coord);
+                    }
+                }
+            }
+            this.isCustomMap = true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to load custom map: " + path, e);
+        }
     }
 
     public void resetGameTurnData() {

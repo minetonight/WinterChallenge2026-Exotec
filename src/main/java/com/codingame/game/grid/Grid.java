@@ -29,6 +29,7 @@ public class Grid {
     public LinkedHashMap<Coord, Tile> cells;
     boolean ySymetry;
     public List<Coord> spawns;
+    public List<Coord> spawns2;
     public List<Coord> apples;
 
     public Grid(int width, int height) {
@@ -40,6 +41,7 @@ public class Grid {
         this.height = height;
         this.ySymetry = ySymetry;
         spawns = new ArrayList<>();
+        spawns2 = new ArrayList<>();
         apples = new ArrayList<>();
 
         cells = new LinkedHashMap<>();
@@ -197,6 +199,37 @@ public class Grid {
                         Coord n = e.add(delta);
                         Tile cell = get(n);
                         if (cell.isValid() && !computed.contains(n) && spawns.contains(n)) {
+                            fifo.add(n);
+                            computed.add(n);
+                        }
+                    }
+                    current.add(e);
+                }
+                islands.add(new HashSet<>(current));
+                current.clear();
+            }
+        }
+
+        return islands;
+    }
+
+    public List<Set<Coord>> detectSpawnIslands2() {
+        List<Set<Coord>> islands = new ArrayList<>();
+        Set<Coord> computed = new HashSet<>();
+        Set<Coord> current = new HashSet<>();
+
+        for (Coord p : spawns2) {
+            if (!computed.contains(p)) {
+                Queue<Coord> fifo = new LinkedList<>();
+                fifo.add(p);
+                computed.add(p);
+
+                while (!fifo.isEmpty()) {
+                    Coord e = fifo.poll();
+                    for (Coord delta : ADJACENCY) {
+                        Coord n = e.add(delta);
+                        Tile cell = get(n);
+                        if (cell.isValid() && !computed.contains(n) && spawns2.contains(n)) {
                             fifo.add(n);
                             computed.add(n);
                         }
