@@ -353,9 +353,9 @@
             grid.
           </p>
           <p>
-            <span class="statement-lineno">Next </span><var>powerSourceCount</var>
+            <span class="statement-lineno">Next </span><var>snakebotCount</var>
             <span class="statement-lineno">lines:</span> The following
-            <const>2</const> inputs for each power source:
+            <const>2</const> inputs for each snakebot:
           </p>
           <ul>
             <li><var>snakebotId</var>: an integer for this snakebot's identifier</li>

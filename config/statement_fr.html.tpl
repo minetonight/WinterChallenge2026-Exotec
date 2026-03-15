@@ -311,7 +311,7 @@
 
           <br/>
           <br/>
-            <span class="statement-lineno">Lignes suivantes </span><var>height</var>
+            <span class="statement-lineno">Les <var>height</var> lignes suivantes </span>
             
             <span class="statement-lineno">:</span> Une ligne de la grille 
             contenant
@@ -325,12 +325,12 @@
           <span class="statement-lineno">Ligne suivante :</span> <var>snakbotsPerPlayer</var> un entier correspondant au nombre de snakebots contrôlés par chaque joueur.
           <br/>
           <br/>
-          <span class="statement-lineno">Lignes suivantes </span><var>snakbotsPerPlayer</var>
+          <span class="statement-lineno">Les <var>snakbotsPerPlayer</var> lignes suivantes </span>
           
           <span class="statement-lineno">:</span> Un entier <var>snakebotId</var> pour chacun des snakebots contrôlés par <b>vous</b>.
           
           <br/><br/>
-          <span class="statement-lineno">Lignes suivantes </span><var>snakbotsPerPlayer</var>
+          <span class="statement-lineno">Les <var>snakbotsPerPlayer</var> Lignes suivantes </span>
           <span class="statement-lineno">:</span> Un entier <var>snakebotId</var> pour chacun des snakebots contrôlés par <b>votre adversaire</b>.
         </div>
       </div>
@@ -356,9 +356,9 @@
             grille.
           </p>
           <p>
-            <span class="statement-lineno">Lignes suivantes </span><var>powerSourceCount</var>
+            <span class="statement-lineno"> Les <var>snakebotCount</var> lignes suivantes </span>
             <span class="statement-lineno">:</span> Les
-            <const>2</const> entrées suivantes pour chaque énergie :
+            <const>2</const> entrées suivantes pour chaque snakebot :
           </p>
           <ul>
             <li><var>snakebotId</var> : un entier correspondant à l’identifiant de ce snakebot</li>

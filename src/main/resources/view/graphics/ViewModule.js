@@ -763,8 +763,8 @@ export class ViewModule {
         });
         this.tooltipManager.registerGlobal((data) => {
             const pos = data.getLocalPosition(gameZone);
-            const x = Math.floor(pos.x / this.tileSize - 0.5);
-            const y = Math.floor(pos.y / this.tileSize - 0.5);
+            const x = Math.floor(pos.x / this.tileSize);
+            const y = Math.floor(pos.y / this.tileSize);
             if (x < 0 || x >= this.globalData.width || y < 0 || y >= this.globalData.height) {
                 return null;
             }
