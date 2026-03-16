@@ -131,11 +131,15 @@ public class Game {
     }
 
     private void loadCustomGrid(String path) {
+        java.nio.file.Path mapPath = java.nio.file.Paths.get(path);
+        if (!java.nio.file.Files.exists(mapPath)) {
+            throw new RuntimeException("Map not found: " + path);
+        }
         try {
-            java.util.List<String> lines = java.nio.file.Files.readAllLines(java.nio.file.Paths.get(path))
+            java.util.List<String> lines = java.nio.file.Files.readAllLines(mapPath)
                 .stream().filter(l -> !l.startsWith("EXPECTED")).collect(java.util.stream.Collectors.toList());
             
-            if (lines.isEmpty()) throw new RuntimeException("Custom map file is empty!");
+            if (lines.isEmpty()) throw new RuntimeException("Custom map file is empty: " + path);
             
             int height = lines.size();
             int width = lines.get(0).length();
