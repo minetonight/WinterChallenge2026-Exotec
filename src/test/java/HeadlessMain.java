@@ -31,6 +31,18 @@ public class HeadlessMain {
         System.out.println("Player 2 Score: " + result.scores.get(1));
         System.out.println("Player 1 Errors: " + (result.errors.get(0) != null ? result.errors.get(0).size() : 0));
         System.out.println("Player 2 Errors: " + (result.errors.get(1) != null ? result.errors.get(1).size() : 0));
+        if (result.errors.get(0) != null && !result.errors.get(0).isEmpty()) {
+            System.out.println("--- Player 1 Error Details ---");
+            for (String err : result.errors.get(0)) {
+                System.out.println(err);
+            }
+        }
+        if (result.errors.get(1) != null && !result.errors.get(1).isEmpty()) {
+            System.out.println("--- Player 2 Error Details ---");
+            for (String err : result.errors.get(1)) {
+                System.out.println(err);
+            }
+        }
         System.out.println("===GAME_RESULT_END===");
         
         System.exit(0);
