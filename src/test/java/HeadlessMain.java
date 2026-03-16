@@ -5,14 +5,20 @@ public class HeadlessMain {
     public static void main(String[] args) throws Exception {
         MultiplayerGameRunner gameRunner = new MultiplayerGameRunner();
 
+        // Set seed here (leave commented for random)
+        // gameRunner.setSeed(-1566415677164768800L);
+
         String bot1Command = "python3 config/Boss.py";
         String bot2Command = "python3 config/Boss.py";
         
         if (args.length > 0) {
             String combinedArgs = args[0];
             String[] parts = combinedArgs.split("\\|\\|\\|");
-            if (parts.length >= 1) bot1Command = parts[0];
-            if (parts.length >= 2) bot2Command = parts[1];
+            if (parts.length >= 1 && !parts[0].isEmpty()) bot1Command = parts[0];
+            if (parts.length >= 2 && !parts[1].isEmpty()) bot2Command = parts[1];
+            if (parts.length >= 3 && !parts[2].isEmpty()) {
+                gameRunner.setSeed(Long.parseLong(parts[2]));
+            }
         }
 
         gameRunner.addAgent(bot1Command, "Player 1");
