@@ -31,6 +31,38 @@ public class HeadlessMain {
         System.out.println("Player 2 Score: " + result.scores.get(1));
         System.out.println("Player 1 Errors: " + (result.errors.get(0) != null ? result.errors.get(0).size() : 0));
         System.out.println("Player 2 Errors: " + (result.errors.get(1) != null ? result.errors.get(1).size() : 0));
+        System.out.println("FailCause: " + result.failCause);
+        System.out.println("ScoresMap: " + result.scores);
+        System.out.println("Agents: " + result.agents);
+        System.out.println("Outputs keys: " + result.outputs.keySet());
+        System.out.println("Errors keys: " + result.errors.keySet());
+        for (String key : result.outputs.keySet()) {
+            java.util.List<String> vals = result.outputs.get(key);
+            if (vals != null && !vals.isEmpty()) {
+                System.out.println("--- Output tail key=" + key + " ---");
+                int start = Math.max(0, vals.size() - 10);
+                for (int i = start; i < vals.size(); i++) {
+                    System.out.println(vals.get(i));
+                }
+            }
+        }
+        for (String key : result.errors.keySet()) {
+            java.util.List<String> vals = result.errors.get(key);
+            if (vals != null && !vals.isEmpty()) {
+                System.out.println("--- Error tail key=" + key + " ---");
+                int start = Math.max(0, vals.size() - 10);
+                for (int i = start; i < vals.size(); i++) {
+                    System.out.println(vals.get(i));
+                }
+            }
+        }
+        if (result.summaries != null && !result.summaries.isEmpty()) {
+            System.out.println("--- Summaries tail ---");
+            int start = Math.max(0, result.summaries.size() - 20);
+            for (int i = start; i < result.summaries.size(); i++) {
+                System.out.println(result.summaries.get(i));
+            }
+        }
         if (result.errors.get(0) != null && !result.errors.get(0).isEmpty()) {
             System.out.println("--- Player 1 Error Details ---");
             for (String err : result.errors.get(0)) {

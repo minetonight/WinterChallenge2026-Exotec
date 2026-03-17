@@ -121,6 +121,7 @@ public class CommandManager {
     }
 
     public void deactivatePlayer(Player player, String message) {
+        System.out.println("DEBUG_DEACTIVATE player=" + player.getIndex() + " reason=" + message);
         player.deactivate(escapeHTMLEntities(message));
         player.setScore(-1);
     }

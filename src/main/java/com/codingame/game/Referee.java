@@ -51,34 +51,69 @@ public class Referee extends AbstractReferee {
     public void gameTurn(int turn) {
         game.resetGameTurnData();
 
+        System.out.println("DEBUG_TURN_BEGIN turn=" + turn);
+
         // Give input to players
         for (Player player : gameManager.getActivePlayers()) {
             if (game.shouldSkipPlayerTurn(player)) {
                 continue;
             }
+            System.out.println(
+                "DEBUG_BEFORE_EXEC turn=" + turn
+                    + " player=" + player.getIndex()
+                    + " active=" + player.isActive()
+            );
             for (String line : Serializer.serializeFrameInfoFor(player, game)) {
                 player.sendInputLine(line);
             }
             player.execute();
+            System.out.println(
+                "DEBUG_AFTER_EXEC turn=" + turn
+                    + " player=" + player.getIndex()
+                    + " active=" + player.isActive()
+                    + " execMs=" + player.getLastExectionTimeMs()
+            );
         }
         // Get output from players
-        handlePlayerCommands();
+        handlePlayerCommands(turn);
 
         game.performGameUpdate(turn);
 
+        for (Player player : game.players) {
+            System.out.println(
+                "DEBUG_AFTER_UPDATE turn=" + turn
+                    + " player=" + player.getIndex()
+                    + " active=" + player.isActive()
+                    + " score=" + player.getScore()
+                    + " liveBirds=" + player.birds.stream().filter(Bird::isAlive).count()
+            );
+        }
+
         if (gameManager.getActivePlayers().size() < 2) {
+            System.out.println("DEBUG_ABORT turn=" + turn + " activePlayers=" + gameManager.getActivePlayers().size());
             abort();
         }
     }
 
-    private void handlePlayerCommands() {
+    private void handlePlayerCommands(int turn) {
         for (Player player : gameManager.getActivePlayers()) {
             if (game.shouldSkipPlayerTurn(player)) {
                 continue;
             }
             try {
+                System.out.println(
+                    "DEBUG_PARSE_BEGIN turn=" + turn
+                        + " player=" + player.getIndex()
+                        + " outputs=" + player.getOutputs().size()
+                );
                 commandManager.parseCommands(player, player.getOutputs());
+                System.out.println(
+                    "DEBUG_PARSE_END turn=" + turn
+                        + " player=" + player.getIndex()
+                        + " active=" + player.isActive()
+                );
             } catch (TimeoutException e) {
+                System.out.println("DEBUG_TIMEOUT player=" + player.getIndex() + " turn=" + turn);
                 player.deactivate("Timeout!");
                 gameManager.addToGameSummary(player.getNicknameToken() + " has not provided " + player.getExpectedOutputLines() + " lines in time");
             }

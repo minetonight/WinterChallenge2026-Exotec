@@ -474,6 +474,13 @@ public class Game {
     public void onEnd() {
         String[] scoreTexts = new String[players.size()];
         for (Player p : players) {
+            System.out.println(
+                "DEBUG_ONEND_PRE player=" + p.getIndex()
+                    + " active=" + p.isActive()
+                    + " score=" + p.getScore()
+                    + " liveBirds=" + p.birds.stream().filter(Bird::isAlive).count()
+                    + " totalBirds=" + p.birds.size()
+            );
             if (!p.isActive()) {
                 p.setScore(-1);
                 scoreTexts[p.getIndex()] = "-";
@@ -485,9 +492,18 @@ public class Game {
                         .sum()
                 );
             }
+            System.out.println(
+                "DEBUG_ONEND_POST player=" + p.getIndex()
+                    + " active=" + p.isActive()
+                    + " score=" + p.getScore()
+            );
         }
 
         if (players.get(0).getScore() == players.get(1).getScore() && players.get(0).getScore() != -1) {
+            System.out.println(
+                "DEBUG_TIEBREAK preScores=" + players.get(0).getScore() + "," + players.get(1).getScore()
+                    + " losses=" + losses[0] + "," + losses[1]
+            );
             // tie breaker: least losses
             players.forEach(p -> {
                 scoreTexts[p.getIndex()] = String.format(
@@ -501,6 +517,10 @@ public class Game {
             });
             for (Player p : players) {
                 p.setScore(p.getScore() - losses[p.getIndex()]);
+                System.out.println(
+                    "DEBUG_TIEBREAK_POST player=" + p.getIndex()
+                        + " finalScore=" + p.getScore()
+                );
             }
         } else {
             players.forEach(p -> {
