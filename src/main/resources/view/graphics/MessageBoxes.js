@@ -16,10 +16,11 @@ export const messageBox = {
 };
 export function initMessages(layer) {
     const self = this;
-    self.messages = [];
+    self.messages = {};
     for (let i = 0; i < self.globalData.playerCount; ++i) {
         const messageGroup = new PIXI.Container();
         for (let k = 0; k < self.globalData.playerBirds[i].length; ++k) {
+            const birdData = self.globalData.playerBirds[i][k];
             const messageContainer = new PIXI.Container();
             const baseScale = 0.5699481865284974;
             const bubble = new PIXI.Container();
@@ -94,7 +95,7 @@ export function initMessages(layer) {
             };
             messageContainer.addChild(bubble);
             messageContainer.addChild(messageText);
-            self.messages.push(messageContainer);
+            self.messages[birdData.id] = messageContainer;
             messageGroup.addChild(messageContainer);
         }
         layer.addChild(messageGroup);

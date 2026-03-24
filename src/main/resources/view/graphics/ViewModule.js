@@ -288,7 +288,10 @@ export class ViewModule {
                 hud.msText.text = ms + 'ms';
             }
             const data = this.progress === 1 ? this.currentData : this.previousData;
-            const score = data.birds.filter(b => b.owner === pIdx && b.alive).flatMap(b => b.body).length;
+            const score = Object.values(data.birds)
+                .filter(b => b.owner === pIdx && b.alive)
+                .flatMap(b => b.body)
+                .length;
             hud.score.text = score.toString();
         }
     }
@@ -406,19 +409,19 @@ export class ViewModule {
         const birdMap = {};
         const headPosMap = {};
         // Birds with initial state
-        const birds = this.previousData.birds;
-        for (let bIdx = 0; bIdx < birds.length; ++bIdx) {
-            const bird = birds[bIdx];
+        const birds = Object.values(this.previousData.birds);
+        for (const bird of birds) {
             if (!bird.alive) {
                 continue;
             }
+            const birdId = bird.id;
             const pIdx = bird.owner;
             const fullBird = [];
             for (let partIdx = 0; partIdx < bird.body.length; ++partIdx) {
                 const partCoord = bird.body[partIdx];
                 const cuicui = partIdx === 0 ? this.getFromPool(`head_${pIdx}`) : this.getFromPool(`body_${pIdx}`);
                 const { display, id } = cuicui;
-                this.birdContainers[bIdx].addChild(display);
+                this.birdContainers[birdId].addChild(display);
                 this.resetBird(cuicui);
                 id.text = (bird.id).toString();
                 cuicui.getTooltip = () => {
@@ -426,7 +429,7 @@ export class ViewModule {
                 };
                 this.placeInGameZone(display, partCoord);
                 if (partIdx === 0) {
-                    headPosMap[bIdx] = partCoord;
+                    headPosMap[birdId] = partCoord;
                     this.turnHeadSprite(cuicui, bird.body);
                 }
                 else if (partIdx === 1) {
@@ -434,7 +437,7 @@ export class ViewModule {
                 }
                 fullBird.push(cuicui);
             }
-            birdMap[bIdx] = fullBird;
+            birdMap[birdId] = fullBird;
         }
         // Move birds according to events
         const moveEvents = this.currentData.events.filter(e => e.type === ev.MOVE);
@@ -651,7 +654,7 @@ export class ViewModule {
     }
     initBirdLayer(layer) {
         const hueStep = [0.1, 0.2];
-        this.birdContainers = [];
+        this.birdContainers = {};
         for (const player of this.globalData.players) {
             let idx = 0;
             const birds = this.globalData.playerBirds[player.index];
@@ -663,7 +666,7 @@ export class ViewModule {
                 });
                 birdContainer.filters = [hueFilter];
                 layer.addChild(birdContainer);
-                this.birdContainers.push(birdContainer);
+                this.birdContainers[birdData.id] = birdContainer;
             }
         }
     }
@@ -789,9 +792,17 @@ export class ViewModule {
     handleFrameData(frameInfo, raw) {
         const dto = parseData(raw, this.globalData);
         const previousFrame = last(this.states);
-        const frameData = Object.assign(Object.assign({}, dto), { previous: null, frameInfo, apples: (previousFrame ? previousFrame.apples : this.globalData.apples), birds: (previousFrame ? previousFrame.birds : this.globalData.playerBirds.map((birds, idx) => (birds.map(b => (Object.assign(Object.assign({}, b), { owner: idx, bodyAfterMove: b.body, alive: true }))))).flat()) });
+        const initialBirds = previousFrame
+            ? previousFrame.birds
+            : this.globalData.playerBirds.reduce((birdsById, birds, owner) => {
+                for (const bird of birds) {
+                    birdsById[bird.id] = Object.assign(Object.assign({}, bird), { owner, bodyAfterMove: bird.body, alive: true });
+                }
+                return birdsById;
+            }, {});
+        const frameData = Object.assign(Object.assign({}, dto), { previous: null, frameInfo, apples: (previousFrame ? previousFrame.apples : this.globalData.apples), birds: initialBirds });
         // Deep copy
-        frameData.birds = frameData.birds.map(bird => (Object.assign(Object.assign({}, bird), { body: [...bird.body] })));
+        frameData.birds = Object.fromEntries(Object.entries(frameData.birds).map(([birdId, bird]) => [birdId, Object.assign(Object.assign({}, bird), { body: [...bird.body] })]));
         frameData.apples = frameData.apples.map(a => (Object.assign({}, a)));
         frameData.previous = previousFrame !== null && previousFrame !== void 0 ? previousFrame : frameData;
         // [*** NOTE: This next bit of code was AI generated as a test, I have reviewed it, it's good ***]
