@@ -21,8 +21,8 @@ public class HeadlessMain {
             }
         }
 
-        gameRunner.addAgent(bot1Command, "Player 1");
-        gameRunner.addAgent(bot2Command, "Player 2");
+        gameRunner.addAgent(bot1Command, BotNameResolver.resolve(bot1Command, "Player 1"));
+        gameRunner.addAgent(bot2Command, BotNameResolver.resolve(bot2Command, "Player 2"));
 
         GameResult result = gameRunner.simulate();
 
