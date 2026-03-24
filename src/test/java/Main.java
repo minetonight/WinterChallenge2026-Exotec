@@ -1,5 +1,7 @@
 import com.codingame.gameengine.runner.MultiplayerGameRunner;
 
+import java.lang.reflect.Method;
+
 public class Main {
     public static void main(String[] args) {
 
@@ -25,6 +27,21 @@ public class Main {
         gameRunner.addAgent(bot1Command, "Player 1");
         gameRunner.addAgent(bot2Command, "Player 2");
 
-        gameRunner.start(8888);
+        gameRunner.simulate();
+
+        String gameJson = extractGameJson(gameRunner);
+        LocalViewerServer.start(gameJson, 8888);
+    }
+
+    private static String extractGameJson(MultiplayerGameRunner gameRunner) {
+        try {
+            Method getJsonResult = Class
+                .forName("com.codingame.gameengine.runner.GameRunner")
+                .getDeclaredMethod("getJSONResult");
+            getJsonResult.setAccessible(true);
+            return (String) getJsonResult.invoke(gameRunner);
+        } catch (ReflectiveOperationException exception) {
+            throw new IllegalStateException("Unable to extract viewer game JSON", exception);
+        }
     }
 }
